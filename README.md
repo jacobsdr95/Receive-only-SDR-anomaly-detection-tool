@@ -88,6 +88,4 @@ python SDR-BLUE-TEAM.py --web-only
 
 Then open `http://localhost:1717/` in a browser.
 
-## License
-
-AGPL-3.0 
+## License\n\nMIT
