@@ -90,4 +90,4 @@ Then open `http://localhost:1717/` in a browser.
 
 ## License
 
-GPL-3.0 
+AGPL-3.0 
