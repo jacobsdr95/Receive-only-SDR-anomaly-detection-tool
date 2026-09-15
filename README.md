@@ -8,7 +8,7 @@
 
 > **Automates RF spectrum monitoring so you don't have to stare at a waterfall in SDR# or GQRX waiting for something unusual to show up.**
 
-RF Sentinel pulls raw IQ samples from a HackRF One, runs them through a DSP pipeline, and uses a layered set of machine learning models to flag anomalous signals â€” with a live web dashboard for reviewing and labeling what it finds. It never transmits â€” a hardware-level TX guard fails loud and terminates the process immediately on any emission attempt.
+RF Sentinel pulls raw IQ samples from a HackRF One, runs them through a DSP pipeline, and uses a layered set of machine learning models to flag anomalous signals -- with a live web dashboard for reviewing and labeling what it finds. It never transmits -- a hardware-level TX guard fails loud and terminates the process immediately on any emission attempt.
 
 ---
 
@@ -32,21 +32,21 @@ RF Sentinel pulls raw IQ samples from a HackRF One, runs them through a DSP pipe
 
 ## How It Works
 
-**Ingestion** â€” Pulls raw IQ data directly from the HackRF (receive-only; see [Limitations & Warnings](#limitations--warnings)).
+**Ingestion** -- Pulls raw IQ data directly from the HackRF (receive-only; see [Limitations & Warnings](#limitations--warnings)).
 
-**DSP pipeline** â€” Uses numpy/scipy to compute FFT-based power spectral density, spectral entropy, kurtosis, sample entropy, a cyclostationary score, and a GSM FCCH detector â€” per channel and per sweep. A Savitzky-Golay pre-filter smooths the PSD before scoring to suppress noise spikes.
+**DSP pipeline** -- Uses numpy/scipy to compute FFT-based power spectral density, spectral entropy, kurtosis, sample entropy, a cyclostationary score, and a GSM FCCH detector -- per channel and per sweep. A Savitzky-Golay pre-filter smooths the PSD before scoring to suppress noise spikes.
 
 **Anomaly detection (three layers)**
 
-1. **Unsupervised, global** â€” DBSCAN + IsolationForest trained on the whole spectrum's behaviour.
-2. **Unsupervised, per signal type** â€” Hidden Markov Model (hmmlearn) for frequency-hopping/spoofing patterns; Local Outlier Factor / One-Class SVM / IsolationForest for other categories. DTW pattern matching identifies FHSS hopping signatures.
-3. **Supervised** â€” LightGBM (â†’ XGBoost â†’ RandomForest fallback) trained on your confirmed labels, used **only to downgrade severity** â€” it never escalates an alert on its own, and it refuses to train (or disables itself) if labels look imbalanced, leaky, or like it is memorising the rule table instead of the signal.
+1. **Unsupervised, global** -- DBSCAN + IsolationForest trained on the whole spectrum's behaviour.
+2. **Unsupervised, per signal type** -- Hidden Markov Model (hmmlearn) for frequency-hopping/spoofing patterns; Local Outlier Factor / One-Class SVM / IsolationForest for other categories. DTW pattern matching identifies FHSS hopping signatures.
+3. **Supervised** -- LightGBM (-> XGBoost -> RandomForest fallback) trained on your confirmed labels, used **only to downgrade severity** -- it never escalates an alert on its own, and it refuses to train (or disables itself) if labels look imbalanced, leaky, or like it is memorising the rule table instead of the signal.
 
-**Confidence gating** â€” Alerts must survive multiple checks (persistence across scans, a power Z-score consensus between AI layers, and the RF downgrade gate) before reaching CRITICAL.
+**Confidence gating** -- Alerts must survive multiple checks (persistence across scans, a power Z-score consensus between AI layers, and the RF downgrade gate) before reaching CRITICAL.
 
-**Web dashboard** â€” A local Flask server (default port 1717) shows recent events, spectrograms, and lets you confirm/reject detections to build the labeled dataset the classifier trains on.
+**Web dashboard** -- A local Flask server (default port 1717) shows recent events, spectrograms, and lets you confirm/reject detections to build the labeled dataset the classifier trains on.
 
-**Storage** â€” Events, spectrum history, and evidence (raw IQ + metadata) are logged to SQLite and `./rf_logs/`.
+**Storage** -- Events, spectrum history, and evidence (raw IQ + metadata) are logged to SQLite and `./rf_logs/`.
 
 ---
 
@@ -54,19 +54,19 @@ RF Sentinel pulls raw IQ samples from a HackRF One, runs them through a DSP pipe
 
 | Category | Detail |
 |---|---|
-| **AI Gate 1 â€” Global** | DBSCAN + Isolation Forest trained across all channels |
-| **AI Gate 2 â€” Per-Type** | HMM (FHSS/Spoof) Â· LOF (RFID/IoT/FakeBTS) Â· OCSVM (Emergency) Â· IF (all others) |
-| **AI Gate 3 â€” Supervised** | LightGBM â†’ XGBoost â†’ RandomForest fallback chain, label-leakage guarded |
-| **AI Gate 4 â€” Downgrade-only** | Classifier can only lower severity, never raise it |
-| **DSP** | Savitzky-Golay pre-filter Â· DTW FHSS tracker Â· CAF cyclostationary analysis Â· GSM FCCH detector |
-| **Confidence gating** | Alerts require â‰¥ 3/5 consecutive rounds + Dual-AI consensus at CRITICAL |
-| **Web dashboard** | Real-time SSE updates Â· Chart.js charts Â· CSV/JSON export Â· calibration wizard |
+| **AI Gate 1 -- Global** | DBSCAN + Isolation Forest trained across all channels |
+| **AI Gate 2 -- Per-Type** | HMM (FHSS/Spoof) * LOF (RFID/IoT/FakeBTS) * OCSVM (Emergency) * IF (all others) |
+| **AI Gate 3 -- Supervised** | LightGBM -> XGBoost -> RandomForest fallback chain, label-leakage guarded |
+| **AI Gate 4 -- Downgrade-only** | Classifier can only lower severity, never raise it |
+| **DSP** | Savitzky-Golay pre-filter * DTW FHSS tracker * CAF cyclostationary analysis * GSM FCCH detector |
+| **Confidence gating** | Alerts require >= 3/5 consecutive rounds + Dual-AI consensus at CRITICAL |
+| **Web dashboard** | Real-time SSE updates * Chart.js charts * CSV/JSON export * calibration wizard |
 | **TX guard** | Every emission call is intercepted and terminates the process immediately |
-| **Storage** | SQLite rotating log Â· fingerprint files Â· evidence snapshots |
+| **Storage** | SQLite rotating log * fingerprint files * evidence snapshots |
 
 ### Monitored Channels (default watchlist)
 
-`GPS L1/L2` Â· `GSM 900/1800` Â· `TETRA` Â· `ISM 433/868/915` Â· `PMR 446` Â· `LoRa` Â· `Drone FHSS 2.4/5.8 GHz` Â· `Wi-Fi 2.4 GHz` Â· `Bluetooth` Â· `ADS-B 1090 MHz` Â· `L-band Satcom` Â· `Emergency VHF/UHF`
+`GPS L1/L2` * `GSM 900/1800` * `TETRA` * `ISM 433/868/915` * `PMR 446` * `LoRa` * `Drone FHSS 2.4/5.8 GHz` * `Wi-Fi 2.4 GHz` * `Bluetooth` * `ADS-B 1090 MHz` * `L-band Satcom` * `Emergency VHF/UHF`
 
 ---
 
@@ -74,25 +74,25 @@ RF Sentinel pulls raw IQ samples from a HackRF One, runs them through a DSP pipe
 
 ```
 HackRF One (RX only)
-        â”‚
-        â–¼
- FastSweepEngine          â† ~25 ms/channel sweep
-        â”‚
-        â”œâ”€â–º DSP pipeline
-        â”‚     â”œâ”€ Savitzky-Golay pre-filter   [C]
-        â”‚     â”œâ”€ FFT / PSD / entropy / kurtosis / GSM FCCH
-        â”‚     â”œâ”€ DTW FHSS tracker            [B]
-        â”‚     â””â”€ CAF cyclostationary         [D]
-        â”‚
-        â”œâ”€â–º AI [1]  HybridCognitiveAI        (DBSCAN + IF, global)
-        â”œâ”€â–º AI [2]  RFAnomalyAI              (per-type specialists)
-        â””â”€â–º AI [3]  RFThreatClassifier       (LightGBM/XGBoost/RF) [A]
-                â”‚
-                â–¼
-         Confidence gates (Persistence Â· Z-score Â· EMA Â· RF downgrade)
-                â”‚
-                â–¼
-         SQLite  â”€â”€â–º  Flask Web UI  (SSE, :1717)
+        |
+        v
+ FastSweepEngine          <- ~25 ms/channel sweep
+        |
+        +-> DSP pipeline
+        |     +- Savitzky-Golay pre-filter   [C]
+        |     +- FFT / PSD / entropy / kurtosis / GSM FCCH
+        |     +- DTW FHSS tracker            [B]
+        |     +- CAF cyclostationary         [D]
+        |
+        +-> AI [1]  HybridCognitiveAI        (DBSCAN + IF, global)
+        +-> AI [2]  RFAnomalyAI              (per-type specialists)
+        +-> AI [3]  RFThreatClassifier       (LightGBM/XGBoost/RF) [A]
+                |
+                v
+         Confidence gates (Persistence * Z-score * EMA * RF downgrade)
+                |
+                v
+         SQLite  -->  Flask Web UI  (SSE, :1717)
 ```
 
 ---
@@ -101,23 +101,23 @@ HackRF One (RX only)
 
 ### Hardware
 - [HackRF One](https://greatscottgadgets.com/hackrf/) (receive-only mode)
-- `libhackrf` at the system level â€” `apt install hackrf libhackrf-dev` on Debian/Ubuntu, `brew install hackrf` on macOS
+- `libhackrf` at the system level -- `apt install hackrf libhackrf-dev` on Debian/Ubuntu, `brew install hackrf` on macOS
 
 ### Software
 
 | Package | Version | Notes |
 |---|---|---|
-| Python | â‰¥ 3.10 | âœ… required |
-| numpy | any | âœ… required |
-| scipy | any | âœ… required |
-| scikit-learn | any | âœ… required |
-| joblib | any | âœ… required |
-| flask | any | âœ… required |
-| hackrf / pyhackrf | any | âœ… required (try `hackrf` first) |
+| Python | >= 3.10 | [x] required |
+| numpy | any | [x] required |
+| scipy | any | [x] required |
+| scikit-learn | any | [x] required |
+| joblib | any | [x] required |
+| flask | any | [x] required |
+| hackrf / pyhackrf | any | [x] required (try `hackrf` first) |
 | hmmlearn | any | recommended |
-| lightgbm | any | optional â€” Gate 3 fast path |
-| xgboost | any | optional â€” Gate 3 fallback |
-| matplotlib | any | optional â€” spectrum GUI |
+| lightgbm | any | optional -- Gate 3 fast path |
+| xgboost | any | optional -- Gate 3 fallback |
+| matplotlib | any | optional -- spectrum GUI |
 
 ---
 
@@ -140,7 +140,7 @@ pip install hackrf
 # if that fails on your platform:
 # pip install pyhackrf
 
-# 5. Optional â€” faster classifier backend
+# 5. Optional -- faster classifier backend
 pip install lightgbm            # recommended
 pip install xgboost             # fallback
 
@@ -155,13 +155,13 @@ python patched_sdr_blueteam.py --check
 
 ## Usage
 
-### Normal mode â€” full sweep with HackRF
+### Normal mode -- full sweep with HackRF
 
 ```bash
 python SDR-BLUE-TEAM.py
 ```
 
-### Web-only / dev mode â€” no hardware required
+### Web-only / dev mode -- no hardware required
 
 Useful for testing or modifying the Flask UI without a connected HackRF:
 
@@ -183,7 +183,7 @@ python SDR-BLUE-TEAM.py --train-now
 python patched_sdr_blueteam.py path/to/your_file.py
 ```
 
-### Dry-run â€” preview diff without writing
+### Dry-run -- preview diff without writing
 
 ```bash
 python patched_sdr_blueteam.py --dry-run
@@ -215,7 +215,7 @@ Once running, open **http://127.0.0.1:1717** in a browser.
 | Endpoint | Method | Description |
 |---|---|---|
 | `/` | GET | Main dashboard |
-| `/api/stream` | GET | Server-Sent Events â€” live anomaly feed |
+| `/api/stream` | GET | Server-Sent Events -- live anomaly feed |
 | `/api/events` | GET | Recent events (JSON, filterable) |
 | `/api/export` | GET | Download all events as CSV or JSON |
 | `/api/channels` | GET | Per-channel baseline and last Z-score |
@@ -262,7 +262,7 @@ FLASK_PORT = 1717
 Power readings are **relative** until calibrated. Use the `/api/calibration` endpoint or the in-dashboard calibration wizard to enter per-band offsets measured against a known signal generator:
 
 ```
-offset_dB = (true_power_dBm) âˆ’ (sdr_reading_dBm)
+offset_dB = (true_power_dBm) - (sdr_reading_dBm)
 ```
 
 Default placeholder offset is `-50.0 dB` for all bands (`CALIBRATION_VERIFIED = False`).
@@ -274,7 +274,7 @@ Default placeholder offset is `-50.0 dB` for all bands (`CALIBRATION_VERIFIED = 
 Run `python patched_sdr_blueteam.py` to inject four algorithm upgrades into the main file:
 
 ### [A] LightGBM / XGBoost backend
-Replaces RandomForest at Gate 3. 3â€“5Ă— faster inference on embedded hardware (Raspberry Pi, NUC). Fallback chain: **LightGBM â†’ XGBoost â†’ RandomForest â†’ disabled**. All label-leakage and degenerate-model guards are preserved. The saved model file gains a `"backend"` field.
+Replaces RandomForest at Gate 3. 3-5x faster inference on embedded hardware (Raspberry Pi, NUC). Fallback chain: **LightGBM -> XGBoost -> RandomForest -> disabled**. All label-leakage and degenerate-model guards are preserved. The saved model file gains a `"backend"` field.
 
 ### [B] DTW FHSS tracker
 Pure-NumPy Dynamic Time Warping tracks spectral centroid history per channel and compares against four FHSS templates (DJI Lightbridge, OcuSync, ELRS 2.4 GHz, Generic FHSS). Thread-safe singleton. Adds `dtw_fhss_score` and `dtw_fhss_alert` to every anomaly result.
@@ -283,7 +283,7 @@ Pure-NumPy Dynamic Time Warping tracks spectral centroid history per channel and
 Smooths the PSD before entropy and Z-score calculation, suppressing random noise spikes and reducing false positives. Gracefully skips if `scipy` is unavailable or the array is too short. Tunable via `SG_WINDOW_LENGTH` and `SG_POLYORDER`.
 
 ### [D] Advanced cyclostationary (CAF)
-Cyclic Autocorrelation Function at lag Ï„=0 across 8 common baud rates (9.6 k â€“ 2 M sym/s). Man-made signals produce a clear cyclic peak; thermal noise does not. Adds `cyclo_adv_score`, `cyclo_alpha_hz`, and `cyclo_adv_alert`.
+Cyclic Autocorrelation Function at lag tau=0 across 8 common baud rates (9.6 k - 2 M sym/s). Man-made signals produce a clear cyclic peak; thermal noise does not. Adds `cyclo_adv_score`, `cyclo_alpha_hz`, and `cyclo_adv_alert`.
 
 ---
 
@@ -323,17 +323,17 @@ python test_sdr_sentinel.py TestDatabase
 
 ```
 Receive-only-SDR-anomaly-detection-tool/
-â”œâ”€â”€ SDR-BLUE-TEAM.py           # Main monitor â€” entry point
-â”œâ”€â”€ patched_sdr_blueteam.py    # Advanced algorithm patch script (A/B/C/D)
-â”œâ”€â”€ rf_sentinel_ui.py          # Flask web UI (routes, SSE, export)
-â”œâ”€â”€ test_sdr_sentinel.py       # Full test suite (no hardware needed)
-â”œâ”€â”€ README.md
-â””â”€â”€ rf_logs/                   # Created at runtime
-    â”œâ”€â”€ sentinel.log
-    â”œâ”€â”€ rf_sentinel.db
-    â”œâ”€â”€ fingerprints/
-    â”œâ”€â”€ evidence/
-    â””â”€â”€ reports/
++-- SDR-BLUE-TEAM.py           # Main monitor -- entry point
++-- patched_sdr_blueteam.py    # Advanced algorithm patch script (A/B/C/D)
++-- rf_sentinel_ui.py          # Flask web UI (routes, SSE, export)
++-- test_sdr_sentinel.py       # Full test suite (no hardware needed)
++-- README.md
++-- rf_logs/                   # Created at runtime
+    +-- sentinel.log
+    +-- rf_sentinel.db
+    +-- fingerprints/
+    +-- evidence/
+    +-- reports/
 ```
 
 ---
@@ -344,8 +344,8 @@ Receive-only-SDR-anomaly-detection-tool/
 - **Calibration required.** Power readings are uncalibrated by default (`CALIBRATION_VERIFIED = False`). All dBm values are relative until you run a calibration pass with a signal generator.
 - **~25 ms per channel sweep.** Very short bursts (< 25 ms) may be missed entirely.
 - **DSSS signals** below the noise floor may evade detection even with CAF active.
-- **Classifier cold start.** The supervised classifier (Gate 3) stays silent until â‰¥ 200 labeled rows are collected and â‰¥ 2 distinct threat classes are present.
-- **Legal.** Frequency scanning and any related radio use are subject to local telecommunications law â€” that is on you to check for your jurisdiction and hardware. This tool does not verify compliance.
+- **Classifier cold start.** The supervised classifier (Gate 3) stays silent until >= 200 labeled rows are collected and >= 2 distinct threat classes are present.
+- **Legal.** Frequency scanning and any related radio use are subject to local telecommunications law -- that is on you to check for your jurisdiction and hardware. This tool does not verify compliance.
 
 ---
 
