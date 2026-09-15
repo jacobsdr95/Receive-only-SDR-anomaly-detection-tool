@@ -1,8 +1,18 @@
-numpy>=1.21
-scipy>=1.7
-scikit-learn>=0.24
-joblib>=1.0
-flask>=2.0
+# Core Scientific & Data Processing
+numpy>=1.22.0,<2.0.0
+scipy>=1.8.0
+
+# Machine Learning & AI
+scikit-learn>=1.0.0
+lightgbm>=3.3.0
+xgboost>=1.6.0
 hmmlearn>=0.2.7
-matplotlib>=3.4
-hackrf>=0.7
+
+# Web Framework & Interface
+Flask>=2.0.0
+
+# Document Generation & Tooling
+weasyprint>=58.0
+openpyxl>=3.1.0
+pypdf>=3.0.0
+Pillow>=9.0.0
