@@ -5,7 +5,13 @@
 ![License](https://img.shields.io/badge/license-BSD%203--Clause-orange?style=flat-square)
 ![HackRF](https://img.shields.io/badge/hardware-HackRF%20One-blueviolet?style=flat-square)
 ![Receive Only](https://img.shields.io/badge/TX--guard-receive--only-red?style=flat-square)
+### Show Your Support
 
+Enjoyed using RF Sentinel? **Star the project** to show your support!
+
+It helps the project grow and reach more security researchers.
+
+⭐ [Give us a star!](https://github.com/jacobsdr95/Receive-only-SDR-anomaly-detection-tool)
 > **Automates RF spectrum monitoring so you don't have to stare at a waterfall in SDR# or GQRX waiting for something unusual to show up.**
 
 RF Sentinel pulls raw IQ samples from a HackRF One, runs them through a DSP pipeline, and uses a layered set of machine learning models to flag anomalous signals -- with a live web dashboard for reviewing and labeling what it finds. It never transmits -- a hardware-level TX guard fails loud and terminates the process immediately on any emission attempt.
