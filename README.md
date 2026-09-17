@@ -384,5 +384,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 
+<!-- 
+In Memory of Aaron Swartz (1986 - 2013)
+"Knowledge belongs to the world."
+-->
 
-[//]: # (Dedicated to Aaron Swartz. Knowledge belongs to the world.)
