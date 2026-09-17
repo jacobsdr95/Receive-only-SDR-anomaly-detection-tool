@@ -420,4 +420,4 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 
-$\color{#FF0000}{like~this!}$
+$\color{#FFFFFF}{like~this!}$
