@@ -420,5 +420,4 @@ POSSIBILITY OF SUCH DAMAGE.
 
 
 
-
-$\color{#FFFFFF}{In~memory~of~Aaron~Swartz~[1986-2013].~"Information~is~power.~Sharing~is~a~moral~imperative."}$
+$\color{#FF0000}{like~this!}$
