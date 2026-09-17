@@ -5,13 +5,7 @@
 ![License](https://img.shields.io/badge/license-BSD%203--Clause-orange?style=flat-square)
 ![HackRF](https://img.shields.io/badge/hardware-HackRF%20One-blueviolet?style=flat-square)
 ![Receive Only](https://img.shields.io/badge/TX--guard-receive--only-red?style=flat-square)
-### Show Your Support
 
-Enjoyed using RF Sentinel? **Star the project** to show your support!
-
-It helps the project grow and reach more security researchers.
-
-⭐ [Give us a star!](https://github.com/jacobsdr95/Receive-only-SDR-anomaly-detection-tool)
 > **Automates RF spectrum monitoring so you don't have to stare at a waterfall in SDR# or GQRX waiting for something unusual to show up.**
 
 RF Sentinel pulls raw IQ samples from a HackRF One, runs them through a DSP pipeline, and uses a layered set of machine learning models to flag anomalous signals -- with a live web dashboard for reviewing and labeling what it finds. It never transmits -- a hardware-level TX guard fails loud and terminates the process immediately on any emission attempt.
@@ -65,6 +59,7 @@ RF Sentinel pulls raw IQ samples from a HackRF One, runs them through a DSP pipe
 | **AI Gate 3 -- Supervised** | LightGBM -> XGBoost -> RandomForest fallback chain, label-leakage guarded |
 | **AI Gate 4 -- Downgrade-only** | Classifier can only lower severity, never raise it |
 | **DSP** | Savitzky-Golay pre-filter * DTW FHSS tracker * CAF cyclostationary analysis * GSM FCCH detector |
+| **Auto-labeling** | FP/TP events labeled autonomously -- no human input needed for classifier training |
 | **Confidence gating** | Alerts require >= 3/5 consecutive rounds + Dual-AI consensus at CRITICAL |
 | **Web dashboard** | Real-time SSE updates * Chart.js charts * CSV/JSON export * calibration wizard |
 | **TX guard** | Every emission call is intercepted and terminates the process immediately |
@@ -320,7 +315,7 @@ python test_sdr_sentinel.py TestDatabase
 | `TestConfidenceGates` | `PersistenceTracker`, `apply_confidence_gate()` |
 | `TestRXGuard` | TX-call interception via `ReceiveOnlySDRProxy` |
 | `TestRFClassifier` | Training guards, degenerate/leaky detection, predict gating |
-| `TestDatabase` | SQLite CRUD with in-memory DB |
+| `TestDatabase` | SQLite CRUD with in-memory DB, `db_log_event` return ID, `_auto_label` FP/TP logic |
 | `TestSignalFixtures` | Synthetic IQ signal generators used by other tests |
 
 ---
@@ -350,7 +345,7 @@ Receive-only-SDR-anomaly-detection-tool/
 - **Calibration required.** Power readings are uncalibrated by default (`CALIBRATION_VERIFIED = False`). All dBm values are relative until you run a calibration pass with a signal generator.
 - **~25 ms per channel sweep.** Very short bursts (< 25 ms) may be missed entirely.
 - **DSSS signals** below the noise floor may evade detection even with CAF active.
-- **Classifier cold start.** The supervised classifier (Gate 3) stays silent until >= 200 labeled rows are collected and >= 2 distinct threat classes are present.
+- **Classifier cold start.** The supervised classifier (Gate 3) stays silent until >= 200 labeled rows across >= 2 distinct threat classes are collected. Auto-labeling accumulates this without human input -- LOW alerts are labeled FP automatically, HIGH alerts with dual-AI consensus and |Z| > 4.0 are labeled TP. Expect ~500 events before the classifier becomes active in a typical environment.
 - **Legal.** Frequency scanning and any related radio use are subject to local telecommunications law -- that is on you to check for your jurisdiction and hardware. This tool does not verify compliance.
 
 ---
