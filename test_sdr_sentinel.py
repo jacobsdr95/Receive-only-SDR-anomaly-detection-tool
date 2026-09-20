@@ -50,7 +50,7 @@ if np is None:
 # Đưa source vào sys.path và import
 # ---------------------------------------------------------------------------
 _SRC = os.path.join(os.path.dirname(__file__),
-                    "Receive-only-SDR-anomaly-detection-tool")
+                    "Receive-only-SDR-anomaly-detection-tool-main")
 sys.path.insert(0, _SRC)
 
 # Patch DB_PATH trước khi import để tránh tạo file thật
